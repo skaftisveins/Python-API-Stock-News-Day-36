@@ -7,16 +7,13 @@ STOCK_NAME = "TSLA"
 COMPANY_NAME = "Tesla Inc"
 TIME_SERIES = "TIME_SERIES_DAILY"
 
-STOCK_ENDPOINT = "https://www.alphavantage.co/query"
-NEWS_ENDPOINT = "https://newsapi.org/v2/everything"
-
 stock_params = {
     "function": TIME_SERIES,
     "symbol": STOCK_NAME,
-    "apikey": STOCK_API_KEY
+    "apikey": stock_api_key
 }
 
-news_response = requests.get(STOCK_ENDPOINT, stock_params)
+news_response = requests.get(stock_endpoint, stock_params)
 news_response.raise_for_status()
 today = date.today() - timedelta(days=3)
 print(f"HTTP Status Code: {news_response.status_code}")
@@ -48,10 +45,10 @@ print(diff_percent)
 if abs(diff_percent) > 5:
     news_params = {
         "qInTitle": COMPANY_NAME,
-        "apiKey": NEWS_API_KEY
+        "apiKey": news_api_key
     }
 
-    news_response = requests.get(NEWS_ENDPOINT, news_params)
+    news_response = requests.get(news_endpoint, news_params)
     news_response.raise_for_status()
 
     print(f"HTTP Status Code: {news_response.status_code}")
@@ -65,12 +62,15 @@ if abs(diff_percent) > 5:
         f"{STOCK_NAME}: {up_down}{diff_percent}%\nHeadline: {article['title']}. \nBrief: {article['description']}" for article in three_articles]
     print("".join(formatted_articles))
 
-    client = Client(TWILIO_SID, TWILIO_AUTH_TOKEN)
+    client = Client(twilio_account_sid, twilio_auth_token)
 
     for article in formatted_articles:
         message = client.messages.create(
             body=article,
-            from_=VIRTUAL_TWILIO_NUMBER,
-            to=VERIFIED_NUMBER
+            from_=twilio_phone_number,
+            to=my_phone_number
         )
         print(message.status)
+
+else:
+    print("Nothing to see here!")
